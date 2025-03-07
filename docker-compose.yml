@@ -1,0 +1,65 @@
+services:
+  authority1:
+    image: authority-image:latest
+    container_name: authority1
+    ports:
+      - "${PORT_1}:${PORT_1}"
+    environment:
+      - PORT=${PORT_1}
+      - PRIVATE_KEY=${PRIVATE_KEY_1}
+      - PUBLIC_KEY=${PUBLIC_KEY_1}
+    env_file:
+      - .env.authority
+    command: yarn start:authority --authority_index=1
+
+#  authority2:
+#    image: authority-image:latest
+#    container_name: authority2
+#    ports:
+#      - "${PORT_2}:${PORT_2}"
+#    environment:
+#      - PORT=${PORT_2}
+#      - PRIVATE_KEY=${PRIVATE_KEY_2}
+#      - PUBLIC_KEY=${PUBLIC_KEY_2}
+#    env_file:
+#      - .env.authority
+#    command: yarn start:authority --authority_index=2
+#
+#  authority3:
+#    image: authority-image:latest
+#    container_name: authority3
+#    ports:
+#      - "${PORT_3}:${PORT_3}"
+#    environment:
+#      - PORT=${PORT_3}
+#      - PRIVATE_KEY=${PRIVATE_KEY_3}
+#      - PUBLIC_KEY=${PUBLIC_KEY_3}
+#    env_file:
+#      - .env.authority
+#    command: yarn start:authority --authority_index=3
+#
+#  authority4:
+#    image: authority-image:latest
+#    container_name: authority4
+#    ports:
+#      - "${PORT_4}:${PORT_4}"
+#    environment:
+#      - PORT=${PORT_4}
+#      - PRIVATE_KEY=${PRIVATE_KEY_4}
+#      - PUBLIC_KEY=${PUBLIC_KEY_4}
+#    env_file:
+#      - .env.authority
+#    command: yarn start:authority --authority_index=4
+#
+#  authority5:
+#    image: authority-image:latest
+#    container_name: authority5
+#    ports:
+#      - "${PORT_5}:${PORT_5}"
+#    environment:
+#      - PORT=${PORT_5}
+#      - PRIVATE_KEY=${PRIVATE_KEY_5}
+#      - PUBLIC_KEY=${PUBLIC_KEY_5}
+#    env_file:
+#      - .env.authority
+#    command: yarn start:authority --authority_index=5
