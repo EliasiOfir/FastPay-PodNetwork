@@ -19,6 +19,6 @@ export default [
 		res: express.Response,
 		next: NextFunction
 	) => {
-		res.status(500).json({ error: 'A server error has occured.' });
+		res.status(500).json({ error: err.message });
 	},
 ];

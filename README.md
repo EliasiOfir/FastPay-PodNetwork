@@ -25,7 +25,7 @@ yarn dev
 You will probably also want to customize the `package.json` to reflect
 information about your application.
 
-To start setting up your routes, edit [`src/router.ts`](src/router.ts).
+To start setting up your routes, edit [`src/router.ts`](authority/router.ts).
 
 ## Design Choices
 
