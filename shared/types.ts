@@ -1,4 +1,3 @@
-
 export type TransferOrder = {
     amount: number;
     sender: string;
@@ -14,10 +13,17 @@ export type TransferCert = {
 };
 
 
-export type UserState = {
-    publicKey: string; // The public verification key of x
-    balance: number; // Balance of the user (balance𝑥(𝛼))
-    nextSequence: number; // Tracking the expected sequence number (next_sequence𝑥(𝛼))
-    pendingOrder?: TransferOrder; // The last pending transfer order (pending𝑥(𝛼)), if any
-    confirmedCertificates: TransferCert[][]; // List of confirmed certificates (confirmed𝑥(𝛼))
+export type User = {
+    publicKey: string;
+    balance: number;
+    nextSequence: number;
+    pendingOrder?: TransferOrder;
+    confirmedCertificates: TransferCert[][];
+};
+
+
+export type LiteUser = {
+    publicKey: string;
+    balance: number;
+    nextSequence: number;
 };
