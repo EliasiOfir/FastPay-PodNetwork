@@ -2,11 +2,11 @@ import dotenv from 'dotenv';
 
 dotenv.config({path: '.env.authority'});
 
-import * as ed25519 from '@noble/ed25519';
+import * as ed from '@noble/ed25519';
 import {createHash} from 'crypto';
 
-// Set the hashing function manually
-ed25519.etc.sha512Sync = (msg) => createHash('sha512').update(msg).digest();
+// patch: Set the hashing function manually
+ed.etc.sha512Sync = (msg) => createHash('sha512').update(msg).digest();
 
 import express from 'express';
 import helmet from 'helmet';

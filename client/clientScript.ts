@@ -10,7 +10,7 @@ dotenv.config({path: '.env.client'});
 import * as ed from '@noble/ed25519';
 import {createHash} from 'crypto';
 
-// Set the hashing function manually
+// patch: Set the hashing function manually
 ed.etc.sha512Sync = (msg) => createHash('sha512').update(msg).digest();
 
 const authorityClient = new AuthorityClient();
