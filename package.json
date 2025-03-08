@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "start:gen": "ts-node generateEnv.ts",
+    "start:generate": "ts-node generateEnvParams.ts",
     "start:client": "ts-node src/client/clientScript.ts",
     "start:authority": "ts-node src/authority/index.ts",
     "build": "rimraf ./dist && tsc",
