@@ -1,21 +1,20 @@
-# Use Node.js LTS as the base image
-FROM node:20
+# Use a custom version of Node.js
+FROM node:23.6.1-alpine
 
-# Set the working directory inside the container
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# Copy package.json and yarn.lock for installing dependencies
+# Copy package.json and lock files to install dependencies
 COPY package.json yarn.lock ./
 
 # Install dependencies
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
-# Copy the rest of the application code
+# Copy the rest of the application files
 COPY . .
 
-# Expose a port dynamically via environment variables
-# Note: Expose port 3000 as a fallback for development
-EXPOSE 3000
+# Expose the default application port
+EXPOSE 3000,3001,3002,3002,3003,3004
 
-# Command to run the application and pass the PORT dynamically
-CMD ["sh", "-c", "yarn start --port $PORT"]
+# Default command to start the application
+CMD ["yarn", "start:authority"]

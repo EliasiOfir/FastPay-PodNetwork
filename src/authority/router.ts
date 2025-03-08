@@ -64,16 +64,13 @@ router.post('/transfer', (req: Request, res: Response) => {
     try {
 
         transferCert = usersCache.addPendingTransfer(transferOrder)
+        res.send(transferCert);
+    } catch (err: any) {
+        res.status(400).json({error: err.message});
     } finally {
         locks.delete(transferOrder.sender)
     }
 
-    if (!transferCert) {
-        res.status(400).json({error: 'Invalid signature'});
-        return;
-    }
-
-    res.send(transferCert);
 });
 
 router.post('/confirm', (req: Request, res: Response) => {
