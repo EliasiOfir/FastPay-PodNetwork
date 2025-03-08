@@ -21,7 +21,7 @@ class UsersStore {
         const user: User = {
             publicKey,
             balance: 10,
-            pendingOrder: null,
+            pendingOrder: undefined,
             nextSequence: 0,
             confirmedCertificates: []
         };
@@ -42,13 +42,18 @@ class UsersStore {
     }
 
     addPendingTransfer(transfer: TransferOrder): TransferCert {
-        const user = this._userStates.get(transfer.sender)
-        if (!user) throw new Error("Invalid user");
+        const user = this._userStates.get(transfer.sender) ||
+            (() => {
+                throw new Error("Invalid user")
+            })()
 
-        const recipient = this._userStates.get(transfer.recipient)
+        const recipient = this._userStates.get(transfer.recipient);
         if (!recipient) {
             this.initUser(transfer.recipient)
         }
+
+        if (transfer.signature === undefined)
+            throw new Error("No signature");
 
         if (!ed.verify(stringToKey(transfer.signature), transferToMessage(transfer), stringToKey(user.publicKey))) {
             throw new Error("Invalid signature");
@@ -66,8 +71,14 @@ class UsersStore {
     }
 
     confirmOrder(publicKey: string, transferCerts: TransferCert[]): LiteUser {
-        const sender = this.getUser(publicKey);
-        const pendingOrder = sender.pendingOrder;
+        const sender = this.getUser(publicKey) ||
+            (() => {
+                throw new Error("Invalid user")
+            })();
+        const pendingOrder = sender.pendingOrder ||
+            (() => {
+                throw new Error("No pending order")
+            })();
         const recipient = this.getUser(sender.pendingOrder.recipient);
 
         const {verified, errMessage} = this._authority.verify(pendingOrder, transferCerts);
@@ -79,7 +90,7 @@ class UsersStore {
         sender.balance -= pendingOrder.amount;
         recipient.balance += pendingOrder.amount;
         sender.nextSequence++
-        sender.pendingOrder = null;
+        sender.pendingOrder = undefined;
         sender.confirmedCertificates.push(transferCerts);
 
         return sender;

@@ -1,6 +1,7 @@
 import * as ed from "@noble/ed25519";
 import {TransferCert, TransferOrder} from "../shared/types";
 import {keyToString, stringToKey, transferToMessage} from "../shared/signHelper";
+import {throwIfEmpty} from "../shared/common";
 
 export class Authority {
     private readonly _privateKey: Uint8Array;
@@ -9,14 +10,17 @@ export class Authority {
 
 
     constructor() {
-        this._privateKey = stringToKey(process.env.PRIVATE_KEY);
-        this._publicKey = stringToKey(process.env.PUBLIC_KEY);
+        const privateKey = throwIfEmpty(process.env.PRIVATE_KEY, "PRIVATE_KEY is not defined in the environment variables.");
+        const publicKey = throwIfEmpty(process.env.PUBLIC_KEY, "PUBLIC_KEY is not defined in the environment variables.");
+
+        this._privateKey = stringToKey(privateKey);
+        this._publicKey = stringToKey(publicKey);
 
         this._authoritiesPublicKeys = [];
 
         // Loop through all environment variables
         for (const [key, value] of Object.entries(process.env)) {
-            if (key.startsWith("PUBLIC_KEY_")) {
+            if (key.startsWith("PUBLIC_KEY_") && value) {
                 this._authoritiesPublicKeys.push(value);
             }
         }

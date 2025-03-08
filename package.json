@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "scripts": {
-    "start:client": "ts-node ./client/clientScript.ts",
-    "start:authority": "ts-node ./authority/index.ts",
+    "start:gen": "ts-node generateEnv.ts",
+    "start:client": "ts-node src/client/clientScript.ts",
+    "start:authority": "ts-node src/authority/index.ts",
     "build": "rimraf ./dist && tsc",
-    "dev": "ts-node-dev --respawn --pretty --transpile-only authority/index.ts",
+    "dev": "ts-node-dev --respawn --pretty --transpile-only src/authority/index.ts",
     "lint": "tslint -c tslint.json -p tsconfig.json --fix"
   },
   "license": "MIT",

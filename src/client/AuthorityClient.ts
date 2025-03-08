@@ -9,8 +9,9 @@ export class AuthorityClient {
     constructor() {
         this._authoritiesUrl = []
 
+        // for simplicity, assuming all authorities are on the URL
+        // loading ports for authorities
         for (const [key, value] of Object.entries(process.env)) {
-            // Check if the key is a PUBLIC_KEY
             if (key.startsWith("PORT_")) {
                 this._authoritiesUrl.push(`${API_BASE_URL}:${value}`);
             }
@@ -25,7 +26,6 @@ export class AuthorityClient {
         const endpointURL = `${this._authoritiesUrl[0]}/user`;
 
         try {
-            // Make the POST request to the /transfer endpoint
             const response = await axios.post<{ nextSequence: number, balance: number }>(
                 endpointURL,
                 {publicKey},
