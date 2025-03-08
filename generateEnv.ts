@@ -2,7 +2,7 @@ import * as ed from "@noble/ed25519";
 import * as fs from "fs";
 import * as dotenv from "dotenv";
 import {createHash} from "crypto";
-import {generateKeyPair} from "./shared/signHelper";
+import {generateKeyPair} from "./src/shared/signHelper";
 
 // patch: Set the hashing function manually
 ed.etc.sha512Sync = (msg) => createHash("sha512").update(msg).digest();
