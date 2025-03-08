@@ -13,6 +13,8 @@ const router: Router = express.Router();
 router.use(express.json());
 router.use(express.urlencoded({extended: true}));
 
+
+
 router.get('/user/:publicKey', (req: Request, res: Response) => {
     const publicKey = req.params.publicKey;
 
@@ -37,7 +39,6 @@ router.post('/user', (req: Request, res: Response) => {
 router.post('/transfer', (req: Request, res: Response) => {
     console.log(req.body);
     const transferOrder: TransferOrder = req.body;
-
 
     if (!transferOrder.sender || transferOrder.sender.trim().length === 0) {
         res.status(400).json({error: 'Sender is required.'});

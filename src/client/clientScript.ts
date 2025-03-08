@@ -89,7 +89,24 @@ async function transfer() {
 }
 
 async function balance() {
-    console.log(`your balance is: ${(await authorityClient.getUser(publicKey)).balance}`)
+    try {
+        const user = await authorityClient.getUser(publicKey);
+        console.log(`your balance is: ${user.balance}`)
+    } catch (error: any) {
+        console.error('Error during /user API call:', error.message);
+        console.error('Code:', error.code);
+        console.error('Response data:', error.response?.data);
+    }
+}
+
+async function createUser() {
+    try {
+        await authorityClient.createUser(publicKey)
+    } catch (error: any) {
+        console.error('Error during /create API call:', error.message);
+        console.error('Code:', error.code);
+        console.error('Response data:', error.response?.data);
+    }
 }
 
 // Main script logic
@@ -105,8 +122,7 @@ async function main() {
                 await balance();
                 break;
             case "init user":
-                await authorityClient.createUser(publicKey);
-                console.log(`User successfully created with public key: ${publicKey}`);
+                await createUser();
                 break;
             default:
                 console.log('Invalid action type, try again');

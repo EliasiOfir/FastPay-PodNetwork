@@ -22,53 +22,38 @@ export class AuthorityClient {
         }
     }
 
-    async createUser(publicKey: string): Promise<{ nextSequence: number, balance: number }> {
-        const endpointURL = `${this._authoritiesUrl[0]}/user`;
+    async createUser(publicKey: string) {
 
-        try {
-            const response = await axios.post<{ nextSequence: number, balance: number }>(
-                endpointURL,
-                {publicKey},
-                {headers: {'Content-Type': 'application/json'}}
-            );
+        const requests = this._authoritiesUrl.map((url) =>
+            axios.post<{ nextSequence: number, balance: number }>(`${url}/user`, {publicKey}, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+        );
 
-            return response.data;
+        // Wait for all requests to resolve or reject
+        await Promise.all(requests);
 
-        } catch (error: any) {
-            // Handle any errors during the API call
-            console.error('Error during /create API call:', error.message);
-            if (error.response) {
-                console.error('Response data:', error.response.data);
-            }
-            throw error;
-        }
+        console.log(`User successfully created with public key: ${publicKey}`);
     }
 
     async getUser(publicKey: string): Promise<{ nextSequence: number, balance: number }> {
         const endpointURL = `${this._authoritiesUrl[0]}/user/${publicKey}`;
 
-        try {
-            // Make the POST request to the /transfer endpoint
-            const response = await axios.get<{ nextSequence: number, balance: number }>(
-                endpointURL,
-                {headers: {'Content-Type': 'application/json'}}
-            );
+        // Make the POST request to the /transfer endpoint
+        const response = await axios.get<{ nextSequence: number, balance: number }>(
+            endpointURL,
+            {headers: {'Content-Type': 'application/json'}}
+        );
 
-            return response.data;
+        return response.data;
 
-        } catch (error: any) {
-            // Handle any errors during the API call
-            console.error('Error during /create API call:', error.message);
-            if (error.response) {
-                console.error('Error data:', error.response.data);
-            }
-            throw error;
-        }
     }
 
     async transfer(transferOrder: TransferOrder): Promise<void> {
         const transferCerts = await this.postTransfer(transferOrder);
-        console.log('post transfer success');
+        console.log(`Collected ${transferCerts.length} responses out of ${this._authoritiesUrl.length} with status 200`);
 
         // as discussed no need to wait for confirmations
         await this.confirmTransfer(transferCerts, transferOrder.sender)
@@ -132,7 +117,6 @@ export class AuthorityClient {
         // Abort remaining requests
         controllers.forEach((controller) => controller.abort());
 
-        console.log(`Collected ${transferCerts.length} responses out of ${this._authoritiesUrl.length} with status 200:`, transferCerts);
         return transferCerts;
     }
 
