@@ -6,18 +6,8 @@ import {createHash} from 'crypto';
 // patch: Set the hashing function manually
 import * as ed from '@noble/ed25519';
 
+// patch
 ed.etc.sha512Sync = (msg) => createHash('sha512').update(msg).digest();
-
-
-// import * as ed from '@noble/ed25519';
-// const ed = await import('@noble/ed25519');
-// ed.etc.sha512Sync = (msg) => new Uint8Array(createHash('sha512').update(msg).digest());
-//
-//
-// import('@noble/ed25519').then((ed) => {
-//     ed.etc.sha512Sync = (msg) => new Uint8Array(createHash('sha512').update(msg).digest());
-// });
-
 
 import express from 'express';
 import helmet from 'helmet';
@@ -28,17 +18,12 @@ import {throwIfEmpty} from '../shared/common'
 const totalAuthorities = Object.keys(process.env).filter((key) => key.startsWith('PRIVATE_KEY_')).length;
 process.env.TOTAL_AUTHORITIES = totalAuthorities.toString();
 
+// Map authority index to corresponding environment variables
 const authorityIndex = throwIfEmpty(process.argv[2], 'authority index not provided');
 
-// Map authority index to corresponding environment variables
-const portEnvVar = throwIfEmpty(`PORT_${authorityIndex}`, 'port not provided');
-const privateKeyEnvVar = throwIfEmpty(`PRIVATE_KEY_${authorityIndex}`, 'private key not provided');
-const publicKeyEnvVar = throwIfEmpty(`PUBLIC_KEY_${authorityIndex}`, 'public key not provided');
-
-// Update environment variables dynamically
-process.env.PORT = process.env[portEnvVar] || '3000'; // Default port fallback
-process.env.PRIVATE_KEY = process.env[privateKeyEnvVar] || ''; // Fallback to empty string if not set
-process.env.PUBLIC_KEY = process.env[publicKeyEnvVar] || ''; // Fallback to empty string if not set
+process.env.PORT = throwIfEmpty(process.env[`PORT_${authorityIndex}`], 'port not provided');
+process.env.PRIVATE_KEY = throwIfEmpty(process.env[`PRIVATE_KEY_${authorityIndex}`], 'private key not provided');
+process.env.PUBLIC_KEY = throwIfEmpty(process.env[`PUBLIC_KEY_${authorityIndex}`], 'public key not provided');
 
 
 import errorHandlers from '../shared/errorHandlers';

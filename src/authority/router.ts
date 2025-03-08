@@ -1,7 +1,7 @@
 import express, {Router, Request, Response} from 'express';
 import UsersStore from "./UsersStore";
 import {Authority} from "./Authority";
-import {TransferCert, TransferOrder} from "../shared/types";
+import {LiteUser, TransferCert, TransferOrder} from "../shared/types";
 
 const authority = new Authority();
 const usersCache = new UsersStore(authority);
@@ -14,7 +14,7 @@ router.use(express.json());
 router.use(express.urlencoded({extended: true}));
 
 
-
+// get user by public key
 router.get('/user/:publicKey', (req: Request, res: Response) => {
     const publicKey = req.params.publicKey;
 
@@ -22,8 +22,7 @@ router.get('/user/:publicKey', (req: Request, res: Response) => {
         res.status(400).json({error: 'Public key is required.'});
     }
 
-    const {nextSequence, balance} = usersCache.getUser(publicKey)
-    res.send({nextSequence, balance});
+    res.send(usersCache.getUser(publicKey) as LiteUser);
 })
 
 router.post('/user', (req: Request, res: Response) => {
@@ -37,7 +36,6 @@ router.post('/user', (req: Request, res: Response) => {
 })
 
 router.post('/transfer', (req: Request, res: Response) => {
-    console.log(req.body);
     const transferOrder: TransferOrder = req.body;
 
     if (!transferOrder.sender || transferOrder.sender.trim().length === 0) {
