@@ -8,7 +8,6 @@ export class Authority {
     private readonly _publicKey: Uint8Array;
     private readonly _authoritiesPublicKeys: string[];
 
-
     constructor() {
         const privateKey = throwIfEmpty(process.env.PRIVATE_KEY, "PRIVATE_KEY is not defined in the environment variables.");
         const publicKey = throwIfEmpty(process.env.PUBLIC_KEY, "PUBLIC_KEY is not defined in the environment variables.");
