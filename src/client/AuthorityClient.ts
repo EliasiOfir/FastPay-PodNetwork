@@ -72,7 +72,7 @@ export class AuthorityClient {
         console.log(`Collected ${transferCerts.length} responses out of ${this._authoritiesUrl.length} with status 200`);
 
         // as discussed no need to wait for confirmations
-        await this.confirmTransfer(transferCerts)
+        this.confirmTransfer(transferCerts)
             .then(() => {
                 console.log('Successfully confirmed transfer!');
             })
