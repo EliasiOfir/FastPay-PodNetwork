@@ -14,7 +14,14 @@ RUN yarn install
 COPY . .
 
 # Expose the default application port
-EXPOSE 3000,3001,3002,3002,3003,3004
+EXPOSE 3000
+EXPOSE 3001
+EXPOSE 3002
+EXPOSE 3002
+EXPOSE 3003
+EXPOSE 3004
+
+
 
 # Default command to start the application
 CMD ["yarn", "start:authority"]
