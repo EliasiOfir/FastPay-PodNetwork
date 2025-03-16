@@ -4,30 +4,32 @@ import {Authority} from "./Authority";
 import {LiteUser, TransferCert, TransferOrder} from "../shared/types";
 import {throwIfEmpty} from "../shared/common";
 import {stringToKey} from "../shared/signHelper";
+import {Authorities} from "./Authorities";
 
-function initAuthority(): Authority {
+function initAuthorities() {
     const privateKey = throwIfEmpty(process.env.PRIVATE_KEY, "PRIVATE_KEY is not defined in the environment variables.");
     const publicKey = throwIfEmpty(process.env.PUBLIC_KEY, "PUBLIC_KEY is not defined in the environment variables.");
 
+    const authority = new Authority(stringToKey(privateKey), stringToKey(publicKey));
 
     const authoritiesPublicKeys: string[] = [];
-
-// Loop through all environment variables
+    // Loop through all environment variables
     for (const [key, value] of Object.entries(process.env)) {
         if (key.startsWith("PUBLIC_KEY_") && value) {
             authoritiesPublicKeys.push(value);
         }
-    }
 
+    }
     if (authoritiesPublicKeys.length === 0) {
         console.warn('No ports were found in the .env.authority file.');
-    }
 
-    return new Authority(stringToKey(privateKey), stringToKey(publicKey), authoritiesPublicKeys)
+    }
+    const authorities = new Authorities(authoritiesPublicKeys);
+    return {authority, authorities};
 }
 
-const authority = initAuthority()
-const usersCache = new UsersStore(authority);
+const {authority, authorities} = initAuthorities()
+const usersCache = new UsersStore(authority, authorities);
 const locks = new Map<string, boolean>();
 
 const router: Router = express.Router();

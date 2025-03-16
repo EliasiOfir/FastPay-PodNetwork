@@ -2,13 +2,12 @@ import {Authority} from "./Authority";
 import {TransferOrder, TransferCert, User, LiteUser} from "../shared/types";
 import * as ed from "@noble/ed25519";
 import {stringToKey, transferToMessage} from "../shared/signHelper";
+import {Authorities} from "./Authorities";
 
 class UsersStore {
     private _userStates: Map<string, User>;
-    private _authority: Authority;
 
-    constructor(authority: Authority) {
-        this._authority = authority;
+    constructor(private _authority: Authority, private _authorities: Authorities,) {
         this._userStates = new Map<string, User>();
     }
 
@@ -80,7 +79,7 @@ class UsersStore {
             })();
         const recipient = this.getUser(sender.pendingOrder.recipient);
 
-        const {verified, errMessage} = this._authority.verify(pendingOrder, transferCerts);
+        const {verified, errMessage} = this._authorities.verify(pendingOrder, transferCerts);
 
         if (!verified) {
             throw new Error(errMessage);
