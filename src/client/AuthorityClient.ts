@@ -1,4 +1,4 @@
-import {TransferCert, TransferOrder} from "../shared/types";
+import {LiteUser, TransferCert, TransferOrder} from "../shared/types";
 import axios from "axios";
 import {keyToString, stringToKey, transferToMessage} from "../shared/signHelper";
 import * as ed from "@noble/ed25519";
@@ -26,7 +26,7 @@ export class AuthorityClient {
 
     async createUser() {
         const requests = this._authoritiesUrl.map((url) =>
-            axios.post<{ nextSequence: number, balance: number }>(`${url}/user`, {publicKey: this._publicKey}, {
+            axios.post<LiteUser>(`${url}/user`, {publicKey: this._publicKey}, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -39,11 +39,11 @@ export class AuthorityClient {
         console.log(`User successfully created with public key: ${this._publicKey}`);
     }
 
-    async getUser(): Promise<{ nextSequence: number, balance: number }> {
+    async getUser(): Promise<LiteUser> {
         const endpointURL = `${this._authoritiesUrl[0]}/user/${this._publicKey}`;
 
         // Make the POST request to the /transfer endpoint
-        const response = await axios.get<{ nextSequence: number, balance: number }>(
+        const response = await axios.get<LiteUser>(
             endpointURL,
             {headers: {'Content-Type': 'application/json'}}
         );

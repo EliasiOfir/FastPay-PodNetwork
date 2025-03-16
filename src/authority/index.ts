@@ -26,7 +26,7 @@ process.env.PRIVATE_KEY = throwIfEmpty(process.env[`PRIVATE_KEY_${authorityIndex
 process.env.PUBLIC_KEY = throwIfEmpty(process.env[`PUBLIC_KEY_${authorityIndex}`], 'public key not provided');
 
 
-import errorHandlers from '../shared/errorHandlers';
+import errorHandlers from './errorHandlers';
 import router from "./router";
 
 const app = express();
