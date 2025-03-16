@@ -1,7 +1,6 @@
 import inquirer from 'inquirer';
 import {AuthorityClient} from './AuthorityClient';
-import {TransferOrder} from '../shared/types';
-import {generateKeyPair, keyToString, stringToKey, transferToMessage} from "../shared/signHelper";
+import {generateKeyPair} from "../shared/signHelper";
 
 import dotenv from 'dotenv';
 
@@ -13,16 +12,14 @@ import {createHash} from 'crypto';
 // patch: Set the hashing function manually
 ed.etc.sha512Sync = (msg) => createHash('sha512').update(msg).digest();
 
-const authorityClient = new AuthorityClient();
-
 const {privateKey, publicKey} = generateKeyPair();
+
+const authorityClient = new AuthorityClient(privateKey, publicKey);
 
 // Display the randomly generated keys
 console.log('Random keys generated:');
 console.log('Private Key:', privateKey);
 console.log('Public Key:', publicKey);
-
-console.log(`User successfully created with public key: ${publicKey}`);
 
 enum ActionType {
     Transfer = 'transfer',
@@ -44,7 +41,7 @@ async function mainMenu(): Promise<ActionType> {
     return actionType;
 }
 
-async function getTransferParams(): Promise<{ amount: number, recipient: string }> {
+async function transferMenu(): Promise<{ amount: number, recipient: string }> {
     const answers = await inquirer.prompt([
         {
             type: 'input',
@@ -72,72 +69,37 @@ async function getTransferParams(): Promise<{ amount: number, recipient: string 
 }
 
 
-async function transfer() {
-    try {
-        const {amount, recipient} = await getTransferParams()
-
-        const {nextSequence} = await authorityClient.getUser(publicKey)
-
-        const transferOrder: TransferOrder = {
-            sender: publicKey, // Sender public key
-            recipient,
-            amount,
-            nextSequence
-        };
-
-        transferOrder.signature = keyToString(ed.sign(transferToMessage(transferOrder), stringToKey(privateKey)));
-
-        await authorityClient.transfer(transferOrder);
-
-        console.log('Transfer completed successfully!');
-    } catch (error: any) {
-        console.error('Error occurred during execution:', error.message);
-    }
-}
-
-async function balance() {
-    try {
-        const user = await authorityClient.getUser(publicKey);
-        console.log(`your balance is: ${user.balance}`)
-    } catch (error: any) {
-        console.error('Error during /user API call:', error.message);
-        console.error('Code:', error.code);
-        console.error('Response data:', error.response?.data);
-    }
-}
-
-async function createUser() {
-    try {
-        await authorityClient.createUser(publicKey)
-    } catch (error: any) {
-        console.error('Error during /create API call:', error.message);
-        console.error('Code:', error.code);
-        console.error('Response data:', error.response?.data);
-    }
-}
-
-// Main script logic
 async function main() {
     while (true) {
         const action: ActionType = await mainMenu();
+        try {
 
-        switch (action) {
-            case ActionType.Transfer:
-                await transfer();
-                break;
-            case ActionType.Balance:
-                await balance();
-                break;
-            case ActionType.InitUser:
-                await createUser();
-                break;
-            case ActionType.Exit:
-                return;
-            default:
-                console.log('Invalid action type, try again');
+            switch (action) {
+                case ActionType.Transfer:
+                    const {amount, recipient} = await transferMenu()
+                    await authorityClient.transfer(recipient, amount);
+                    console.log('Transfer successful');
+                    break;
+                case ActionType.Balance:
+                    console.log(`Balance: ${await authorityClient.getBalance()}`);
+                    break;
+                case ActionType.InitUser:
+                    await authorityClient.createUser();
+                    console.log('User successfully created');
+                    break;
+                case ActionType.Exit:
+                    console.log('Exiting...');
+                    return;
+                default:
+                    console.log('Invalid action type, try again');
+            }
+        } catch (err: any) {
+            console.error('Error code:', err.code);
+            console.error('Error message:', err.message);
+            console.error('Error data:', err.response?.data);
+            console.log('Try again');
         }
     }
 }
 
-// Execute the main function
 main().catch(console.error);

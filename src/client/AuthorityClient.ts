@@ -1,15 +1,17 @@
 import {TransferCert, TransferOrder} from "../shared/types";
 import axios from "axios";
+import {keyToString, stringToKey, transferToMessage} from "../shared/signHelper";
+import * as ed from "@noble/ed25519";
 
 const API_BASE_URL: string = process.env.API_BASE_URL || 'http://localhost';
 
 export class AuthorityClient {
     private readonly _authoritiesUrl: string[];
 
-    constructor() {
+    constructor(private readonly _privateKey: string, private readonly _publicKey: string) {
         this._authoritiesUrl = []
 
-        // for simplicity, assuming all authorities are on the URL
+        // for simplicity, assuming all authorities are on the same URL
         // loading ports for authorities
         for (const [key, value] of Object.entries(process.env)) {
             if (key.startsWith("PORT_")) {
@@ -22,10 +24,9 @@ export class AuthorityClient {
         }
     }
 
-    async createUser(publicKey: string) {
-
+    async createUser() {
         const requests = this._authoritiesUrl.map((url) =>
-            axios.post<{ nextSequence: number, balance: number }>(`${url}/user`, {publicKey}, {
+            axios.post<{ nextSequence: number, balance: number }>(`${url}/user`, {publicKey: this._publicKey}, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -35,11 +36,11 @@ export class AuthorityClient {
         // Wait for all requests to resolve or reject
         await Promise.all(requests);
 
-        console.log(`User successfully created with public key: ${publicKey}`);
+        console.log(`User successfully created with public key: ${this._publicKey}`);
     }
 
-    async getUser(publicKey: string): Promise<{ nextSequence: number, balance: number }> {
-        const endpointURL = `${this._authoritiesUrl[0]}/user/${publicKey}`;
+    async getUser(): Promise<{ nextSequence: number, balance: number }> {
+        const endpointURL = `${this._authoritiesUrl[0]}/user/${this._publicKey}`;
 
         // Make the POST request to the /transfer endpoint
         const response = await axios.get<{ nextSequence: number, balance: number }>(
@@ -51,12 +52,27 @@ export class AuthorityClient {
 
     }
 
-    async transfer(transferOrder: TransferOrder): Promise<void> {
+    async getBalance(): Promise<number> {
+        return (await this.getUser()).balance;
+    }
+
+    async transfer(recipient: string, amount: number): Promise<void> {
+        const {nextSequence} = await this.getUser()
+
+        const transferOrder: TransferOrder = {
+            sender: this._publicKey, // Sender public key
+            recipient,
+            amount,
+            nextSequence
+        };
+
+        transferOrder.signature = keyToString(ed.sign(transferToMessage(transferOrder), stringToKey(this._privateKey)));
+
         const transferCerts = await this.postTransfer(transferOrder);
         console.log(`Collected ${transferCerts.length} responses out of ${this._authoritiesUrl.length} with status 200`);
 
         // as discussed no need to wait for confirmations
-        await this.confirmTransfer(transferCerts, transferOrder.sender)
+        await this.confirmTransfer(transferCerts)
             .then(() => {
                 console.log('Successfully confirmed transfer!');
             })
@@ -66,6 +82,7 @@ export class AuthorityClient {
     }
 
     async postTransfer(transferOrder: TransferOrder): Promise<TransferCert[]> {
+        // 200 response defined as success
         const condition = (response: any) => response.status === 200;
 
         // To store requests and their controllers
@@ -74,7 +91,6 @@ export class AuthorityClient {
 
         let resolver: any;
 
-        // Create a promise that resolves once we gather 5 responses with status 200
         const trackerPromise = new Promise<void>((resolve) => {
             resolver = resolve;
         });
@@ -111,7 +127,6 @@ export class AuthorityClient {
                 });
         });
 
-
         await trackerPromise;
 
         // Abort remaining requests
@@ -120,9 +135,9 @@ export class AuthorityClient {
         return transferCerts;
     }
 
-    async confirmTransfer(transferCerts: TransferCert[], publicKey: string): Promise<void> {
+    async confirmTransfer(transferCerts: TransferCert[]): Promise<void> {
         const requests = this._authoritiesUrl.map((url) =>
-            axios.post(`${url}/confirm`, {transferCerts, publicKey}, {
+            axios.post(`${url}/confirm`, {transferCerts, publicKey: this._publicKey}, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
