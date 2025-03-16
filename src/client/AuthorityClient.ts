@@ -144,7 +144,6 @@ export class AuthorityClient {
             })
         );
 
-        // Wait for all requests to resolve or reject
         await Promise.all(requests);
     }
 }
