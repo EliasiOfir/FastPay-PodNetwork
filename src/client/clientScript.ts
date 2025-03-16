@@ -24,13 +24,20 @@ console.log('Public Key:', publicKey);
 
 console.log(`User successfully created with public key: ${publicKey}`);
 
-async function mainMenu(): Promise<'transfer' | 'balance' | 'init user'> {
+enum ActionType {
+    Transfer = 'transfer',
+    Balance = 'balance',
+    InitUser = 'init user',
+    Exit = 'exit',
+}
+
+async function mainMenu(): Promise<ActionType> {
     const {actionType} = await inquirer.prompt([
         {
             type: 'list',
             name: 'actionType',
             message: 'What would you like to do?',
-            choices: ['transfer', 'balance', 'init user']
+            choices: Object.values(ActionType)
         }
     ]);
 
@@ -112,18 +119,20 @@ async function createUser() {
 // Main script logic
 async function main() {
     while (true) {
-        const action = await mainMenu();
+        const action: ActionType = await mainMenu();
 
         switch (action) {
-            case "transfer":
+            case ActionType.Transfer:
                 await transfer();
                 break;
-            case "balance":
+            case ActionType.Balance:
                 await balance();
                 break;
-            case "init user":
+            case ActionType.InitUser:
                 await createUser();
                 break;
+            case ActionType.Exit:
+                return;
             default:
                 console.log('Invalid action type, try again');
         }
