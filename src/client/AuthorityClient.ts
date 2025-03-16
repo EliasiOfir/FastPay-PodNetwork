@@ -33,10 +33,7 @@ export class AuthorityClient {
             })
         );
 
-        // Wait for all requests to resolve or reject
         await Promise.all(requests);
-
-        console.log(`User successfully created with public key: ${this._publicKey}`);
     }
 
     async getUser(): Promise<LiteUser> {
