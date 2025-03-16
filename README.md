@@ -6,8 +6,9 @@ To generate new .env files for 2 authorities (or more) run:
 `yarn start:generate 2`
 
 ### Run 2 authorities:
-docker compose build
-docker compose build
+`docker build -t authority-image:latest .`
+
+`docker compose up`
 
 ### Run a client:
 `yarn install`
